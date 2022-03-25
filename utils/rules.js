@@ -51,11 +51,10 @@ const Rules = {
                 return true;
             }
         }
-
     },
 
     doNotIgnore(url) {
-        return this.notExemptions(url);
+		return this.notExemptions(url);
     },
 
     sortLinks(links) {

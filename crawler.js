@@ -23,6 +23,7 @@ const log = require('./utils/log');
 const _ = require('underscore');
 const config = require('./config');
 const parallel = require('paralleljs');
+const puppeteer = require('puppeteer');
 
 const crawler = {
 
@@ -40,7 +41,7 @@ const crawler = {
 
     getXml(xmUrl, limit) {
         log.log(`Queuing ${xmUrl}`);
-        webService.getWeb(xmUrl).then((data) => {
+        webService.getWeb(xmUrl,this.browser).then((data) => {
             log.log(`Data received for ${xmUrl}`);
             this.counter = this.counter + 1;
             this.allUrls = _.union(this.allUrls, rulesService.checkRules(data));
@@ -62,7 +63,8 @@ const crawler = {
     * 6. autoFetch again
     * 7. If processes are empty, create sitemap
     */
-    autoFetch() {
+    async autoFetch() {
+		const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"] });
         while (this.processes.length > 0) {
 
             // Remove url from 'process' array
@@ -75,7 +77,7 @@ const crawler = {
             this.processesCompleted.push(xmUrl);
 
             // Feed the base Url and fetch HTML
-            webService.getWeb(xmUrl).then((data) => {
+            webService.getWeb(xmUrl,browser).then((data) => {
 
                 log.log(`Data received for ${xmUrl}`);
                 const newUrls = rulesService.checkRules(data);
@@ -85,6 +87,7 @@ const crawler = {
                 this.dataFetched = this.dataFetched + 1;
                                 
                 if ((this.counter === this.dataFetched) && this.counter !== 1) {
+					console.log("finish...");
                     filesService.createXml(rulesService.sortLinks(this.allUrls));
                 } else {
                     this.queueUrls(newUrls);

@@ -18,6 +18,7 @@
 
 const puppeteer = require('puppeteer');
 const config = require('../config');
+const fs = require('fs');
 
 process.on('unhandledrejection', () => {
     console.log('unhandled error occured');
@@ -25,13 +26,22 @@ process.on('unhandledrejection', () => {
 
 const WebService = {
 
-    async getWeb(url) {
+    async getWeb(url, browser) {
         try {
-            const browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
             await page.setViewport({ width: 1920, height: 926 });
+			//console.log(url);
             await page.goto(url, config.pageLoad);
+			const result = await page.content();
+			//fs.writeFileSync("contents.txt", result,{flag:'a+'});
+			if (result.includes("Server-Fehler")) {
+				console.log ("SERR FOUND");
+				return getWeb(url);
+			}
+			//fs.writeFileSync("contentsclean.txt", result,{flag:'a+'});
             const links = await page.$$eval('a', as => as.map(a => a.href));
+			//fs.writeFileSync("links.txt", JSON.stringify(links),{flag:'a+'});
+			//console.log(links);
             return links;
         } catch (e) {
             return [];
