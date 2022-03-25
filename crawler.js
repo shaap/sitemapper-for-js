@@ -36,6 +36,8 @@ const crawler = {
     processesCompleted: [],
 
     dataFetched: 0,
+	
+	browser: [],
 
     baseUrlHashes: config.base.split('/').length,
 
@@ -64,7 +66,6 @@ const crawler = {
     * 7. If processes are empty, create sitemap
     */
     async autoFetch() {
-		const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"] });
         while (this.processes.length > 0) {
 
             // Remove url from 'process' array
@@ -77,7 +78,7 @@ const crawler = {
             this.processesCompleted.push(xmUrl);
 
             // Feed the base Url and fetch HTML
-            webService.getWeb(xmUrl,browser).then((data) => {
+            webService.getWeb(xmUrl,this.browser).then((data) => {
 
                 log.log(`Data received for ${xmUrl}`);
                 const newUrls = rulesService.checkRules(data);
@@ -95,6 +96,10 @@ const crawler = {
             });
         }
     },
+	
+	async init() {
+		this.browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"] });
+	},
 
     queueUrls(urls) {        
         // Filter Urls already processed stored in 'processCompleted'
@@ -116,5 +121,4 @@ const crawler = {
         }
     }
 }
-
 module.exports = crawler;

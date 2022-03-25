@@ -21,16 +21,25 @@ const config = require('./config');
 const pages = config.urls;
 const parallel = require('paralleljs');
 const crawler = require('./crawler');
+const { CronJob } = require('cron');
+const fs = require('fs');
 
 
 const app = http.createServer((req, res) => {  
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-
-    res.end('Sitemap generator!\n');
+		fs.readFile("sitemap.xml", function (err,data) {
+			if (err) {
+				res.writeHead(404);
+				//res.end(JSON.stringify(err));
+				res.end("Sitemap being generated...");
+				return;
+			}
+			res.writeHead(200, {'Content-Type': 'application/xml'});
+			res.end(data);
+		});
 });
 
 
-function crawlBusiness() {
+async function crawlBusiness() {
     try {
         if (!config.autoCrawl) {
             // Setting up processes
@@ -40,6 +49,7 @@ function crawlBusiness() {
             // Running the process
             new parallel(processes);
         } else {
+			await crawler.init();
             process.setMaxListeners(Infinity);
             crawler.processes.push(config.base);
             crawler.autoFetch();
@@ -54,10 +64,12 @@ function crawlBusiness() {
 startServer();
 
 function startServer() {
-    const server = app.listen(process.env.PORT || 8090, err => {
+    const server = app.listen(process.env.PORT || 9055, err => {
         if (err) return console.error(err);
         const port = server.address().port;
         console.info(`App listening on port ${port}`);
         crawlBusiness();
-    });
+		const job = new CronJob('59 23 * * 0', crawlBusiness);
+		job.start();
+	});
 }

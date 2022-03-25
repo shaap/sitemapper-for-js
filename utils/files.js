@@ -35,7 +35,7 @@ const FilesService = {
         log.log(`Creating sitemap for ${hrefs.length} links`);
         fs.writeFileSync(`sitemap.xml`, str, 'utf-8');
         fs.writeFileSync(`sitemap.json`, JSON.stringify({'hrefs': hrefs}), 'utf-8');
-        setTimeout(() => process.exit(), 0);
+        //setTimeout(() => process.exit(), 0);
     }
 }
 

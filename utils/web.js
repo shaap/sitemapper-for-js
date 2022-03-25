@@ -36,10 +36,11 @@ const WebService = {
 			//fs.writeFileSync("contents.txt", result,{flag:'a+'});
 			if (result.includes("Server-Fehler")) {
 				console.log ("SERR FOUND");
-				return getWeb(url);
+				return await getWeb(url);
 			}
 			//fs.writeFileSync("contentsclean.txt", result,{flag:'a+'});
             const links = await page.$$eval('a', as => as.map(a => a.href));
+			console.log(links.length);
 			//fs.writeFileSync("links.txt", JSON.stringify(links),{flag:'a+'});
 			//console.log(links);
             return links;
