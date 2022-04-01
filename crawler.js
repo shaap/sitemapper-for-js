@@ -100,6 +100,11 @@ const crawler = {
 	async init() {
 		this.browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"] });
 	},
+	
+	async closeBrowser() {
+		console.log ("BR CLOSE");
+		this.browser.close();
+	},
 
     queueUrls(urls) {        
         // Filter Urls already processed stored in 'processCompleted'

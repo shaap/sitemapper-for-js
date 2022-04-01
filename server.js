@@ -53,6 +53,7 @@ async function crawlBusiness() {
             process.setMaxListeners(Infinity);
             crawler.processes.push(config.base);
             crawler.autoFetch();
+			//crawler.closeBrowser();
         }
     }
     catch (e) {

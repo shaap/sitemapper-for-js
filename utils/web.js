@@ -39,8 +39,14 @@ const WebService = {
 				return await getWeb(url);
 			}
 			//fs.writeFileSync("contentsclean.txt", result,{flag:'a+'});
+			let robots = await page.$eval("head > meta[name='robots']", element => element.content);
+
+			if (!robots.includes("index") || !robots.includes("follow")) {
+				console.log("Excluded (META) " + url); 
+				return [];
+			}
             const links = await page.$$eval('a', as => as.map(a => a.href));
-			console.log(links.length);
+			//console.log(links.length);
 			//fs.writeFileSync("links.txt", JSON.stringify(links),{flag:'a+'});
 			//console.log(links);
             return links;
