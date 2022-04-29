@@ -43,7 +43,7 @@ const crawler = {
 
     getXml(xmUrl, limit) {
         log.log(`Queuing ${xmUrl}`);
-        webService.getWeb(xmUrl,this.browser).then((data) => {
+        webService.getWeb(xmUrl,this.browser).then(([index, data]) => {
             log.log(`Data received for ${xmUrl}`);
             this.counter = this.counter + 1;
             this.allUrls = _.union(this.allUrls, rulesService.checkRules(data));
@@ -78,11 +78,12 @@ const crawler = {
             this.processesCompleted.push(xmUrl);
 
             // Feed the base Url and fetch HTML
-            webService.getWeb(xmUrl,this.browser).then((data) => {
-
+            webService.getWeb(xmUrl,this.browser).then(([index, data]) => {
                 log.log(`Data received for ${xmUrl}`);
                 const newUrls = rulesService.checkRules(data);
-                this.allUrls = _.union(this.allUrls, newUrls);
+                if(index && this.counter !== 1) {
+                    this.allUrls = _.union(this.allUrls, [xmUrl]);
+                }
 
                 log.log(`Data Queued ${this.counter} - Completed - ${this.dataFetched}`);
                 this.dataFetched = this.dataFetched + 1;
@@ -98,6 +99,11 @@ const crawler = {
     },
 	
 	async init() {
+        this.counter = 0;
+        this.allUrls = [];
+        this.processes = [];
+        this.processesCompleted = [];
+        this.dataFetched = 0;
 		this.browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"] });
 	},
 	

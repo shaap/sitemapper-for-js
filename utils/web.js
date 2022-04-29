@@ -36,22 +36,23 @@ const WebService = {
 			//fs.writeFileSync("contents.txt", result,{flag:'a+'});
 			if (result.includes("Server-Fehler")) {
 				console.log ("SERR FOUND");
-				return await getWeb(url);
+				return await this.getWeb(url, browser);
 			}
 			//fs.writeFileSync("contentsclean.txt", result,{flag:'a+'});
 			let robots = await page.$eval("head > meta[name='robots']", element => element.content);
+            robots = robots.split(',');
 
-			if (!robots.includes("index") || !robots.includes("follow")) {
+			if (!robots.includes("follow") || !robots.includes("index")) {
 				console.log("Excluded (META) " + url); 
-				return [];
+				return [false, []];
 			}
             const links = await page.$$eval('a', as => as.map(a => a.href));
 			//console.log(links.length);
 			//fs.writeFileSync("links.txt", JSON.stringify(links),{flag:'a+'});
 			//console.log(links);
-            return links;
+            return [true, links];
         } catch (e) {
-            return [];
+            return [false, []];
         }
     }
 
